@@ -5,23 +5,19 @@ const options = {
     autoplay: true,
     controls: true,
 };
-    const player = new Player(iframe, options);
+const player = new Player(iframe, options);
+const STORAGE_KEY = 'videoplayer-current-time';    
 
-player.on('timeupdate', (e) => {
+player.on('timeupdate', throttle(onPlay, 1000));
+onPageReload();   
+function onPlay (e) {
     const currentTime = e.seconds;
-localStorage.setItem('videoplayer-current-time', currentTime);
-
-const savedTime = JSON.parse(localeStorage.getItem('videoplayer-current-time'));
-
-if (savedTime) {
-   savedTime = currentTime;
+localStorage.setItem(STORAGE_KEY, currentTime);
 }
-
-
-player.on('timeupdate', throttle((e) => {
-    const currentTime = e.saconds;
-    localStorage.setItem('videoplayer-current-time', JSON.stringify(currentTime));
-}, 1000));
-    
-});
-
+function onPageReload() {
+    const savedTime = localStorage.getItem(STORAGE_KEY);
+    if (!savedTime) {
+        return;
+    }
+    player.setCurrentTime(savedTime);
+}
